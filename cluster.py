@@ -31,7 +31,7 @@ def load_paperdata(distance_f):
 			min_dis, max_dis = min(min_dis, dis), max(max_dis, dis)
 			distances[(x1, x2)] = float(d)
 			distances[(x2, x1)] = float(d)
-	for i in xrange(max_id):
+	for i in range(max_id):
 		distances[(i, i)] = 0.0
 	logger.info("PROGRESS: load end")
 	return distances, max_dis, min_dis, max_id
@@ -107,8 +107,8 @@ def local_density(max_id, distances, dc, guass=True, cutoff=False):
 	cutoff_func = lambda dij, dc: 1 if dij < dc else 0
 	func = guass and guass_func or cutoff_func
 	rho = [-1] + [0] * max_id
-	for i in xrange(1, max_id):
-		for j in xrange(i + 1, max_id + 1):
+	for i in range(1, max_id):
+		for j in range(i + 1, max_id + 1):
 			rho[i] += func(distances[(i, j)], dc)
 			rho[j] += func(distances[(i, j)], dc)
 		if i % (max_id / 10) == 0:
@@ -132,8 +132,8 @@ def min_distance(max_id, max_dis, distances, rho):
 	sort_rho_idx = np.argsort(-rho)
 	delta, nneigh = [0.0] + [float(max_dis)] * (len(rho) - 1), [0] * len(rho)
 	delta[sort_rho_idx[0]] = -1.
-	for i in xrange(1, max_id):
-		for j in xrange(0, i):
+	for i in range(1, max_id):
+		for j in range(0, i):
 			old_i, old_j = sort_rho_idx[i], sort_rho_idx[j]
 			if distances[(old_i, old_j)] < delta[old_i]:
 				delta[old_i] = distances[(old_i, old_j)]

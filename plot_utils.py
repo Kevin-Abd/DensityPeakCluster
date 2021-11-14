@@ -28,7 +28,7 @@ def plot_scatter_diagram(which_fig, x, y, x_label = 'x', y_label = 'y', title = 
 	else:
 		clses = set(style_list)
 		xs, ys = {}, {}
-		for i in xrange(len(x)):
+		for i in range(len(x)):
 			try:
 				xs[style_list[i]].append(x[i])
 				ys[style_list[i]].append(y[i])

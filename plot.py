@@ -30,8 +30,8 @@ def plot_cluster(cluster):
 	logger.info("PLOT: cluster result, start multi-dimensional scaling")
 	dp = np.zeros((cluster.max_id, cluster.max_id), dtype = np.float32)
 	cls = []
-	for i in xrange(1, cluster.max_id):
-		for j in xrange(i + 1, cluster.max_id + 1):
+	for i in range(1, cluster.max_id):
+		for j in range(i + 1, cluster.max_id + 1):
 			dp[i - 1, j - 1] = cluster.distances[(i, j)]
 			dp[j - 1, i - 1] = cluster.distances[(i, j)]
 		cls.append(cluster.cluster[i])
