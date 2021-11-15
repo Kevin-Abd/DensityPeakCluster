@@ -8,16 +8,27 @@ from plot_utils import *
 from utils import convert_to_matrix, load_paperdata
 
 
-def plot_rho_delta(rho, delta):
+def plot_rho_delta(rho, delta, density_threshold=None, distance_threshold=None):
     """
     Plot scatter diagram for rho-delta points
 
     Args:
         rho   : rho list
         delta : delta list
+        density_threshold : density threshold
+        distance_threshold: distance threshold
     """
     logger.info("PLOT: rho-delta plot")
     plot_scatter_diagram(0, rho[1:], delta[1:], x_label='rho', y_label='delta', title='Decision Graph')
+
+    if density_threshold is not None and distance_threshold is not None:
+        plt.axvline(density_threshold, 0, 1000)
+        plt.axhline(distance_threshold, 0, 1000)
+        index = np.logical_and(rho >= density_threshold, delta >= distance_threshold)
+        items = np.where(index)[0] - 1
+        for item in items:
+            plt.plot(rho[item+1], delta[item+1], marker='x', ms=10)
+
     plt.show()
     plt.savefig('Decision Graph.jpg')
 
@@ -90,7 +101,7 @@ if __name__ == '__main__':
     # plot_rho_delta(rho, delta)   #plot to choose the threshold
 
     dpcluster = DensityPeakCluster()
-    rho, delta, nneigh, cluster, ccenter = dpcluster.cluster(distances_matrix, max_dis, min_dis, max_id,20, 0.1)
+    rho, delta, nneigh, cluster, ccenter = dpcluster.cluster(distances_matrix, max_dis, min_dis, max_id, 20, 0.1)
 
     unique_centers = np.unique(ccenter)
     logger.info(str(len(unique_centers)) + ' center as below')
