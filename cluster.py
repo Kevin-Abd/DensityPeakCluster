@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import logging
-import math
+
 import numpy as np
 
 from utils import convert_matrix_to_dense
@@ -66,44 +66,6 @@ def auto_select_dc(max_id, max_dis, min_dis, distances_1d):
     return dc
 
 
-def local_density(max_id, distances, dc, guass=True, cutoff=False):
-    """
-    Compute all points' local density
-
-    Args:
-        max_id    : max continues id
-        distances : distance matrix
-        dc        : local density threshold
-        guass     : use guass func or not(can't use together with cutoff)
-        cutoff    : use cutoff func or not(can't use together with guass)
-
-    Returns:
-        local density vector that index is the point index that start from 1
-    """
-    assert guass and cutoff is False and guass or cutoff is True
-    logger.info("PROGRESS: compute local density")
-    # Note
-    # Guass: np.exp(- (d[i,j] / dc) ** 2)
-    # Cutoff: 1 if d[i,j] < dc else 0
-    # Rho[i] = sum( f(d[i,j], dc) ) for j in 0 to max_id - f(d[i,i], dc)
-
-    rho = np.zeros(max_id + 1, float)
-    rho[0] = -1
-    if guass:
-        for i in range(0, max_id):
-            t = -(distances[i, :] / dc) ** 2
-            rho[i + 1] = np.exp(t).sum() - 1  # remove guass(i,i) that equals to 1
-            if i % (max_id / 10) == 0:
-                logger.info("PROGRESS: guass at index #%i" % i)
-    else:
-        for i in range(0, max_id):
-            rho[i + 1] = (distances[i, :] < dc).sum() - 1  # remove cutoff(i,i) that equals to 1
-            if i % (max_id / 10) == 0:
-                logger.info("PROGRESS: cutoff at index #%i" % i)
-
-    return rho
-
-
 def min_distance(max_id, max_dis, distances, rho):
     """
     Compute all points' min distance to the higher local density point(which is the nearest neighbor)
@@ -143,7 +105,8 @@ def min_distance(max_id, max_dis, distances, rho):
 
 
 class DensityPeakCluster(object):
-    def local_density(self, distances, max_dis, min_dis, max_id, dc=None, auto_select_dc=False):
+    def local_density(self, distances, max_dis, min_dis, max_id, dc=None, auto_select_dc=False, guass=True,
+                      cutoff=False):
         """
         Just compute local density
 
@@ -159,11 +122,33 @@ class DensityPeakCluster(object):
             local density vector, dc
         """
         assert not (dc is not None and auto_select_dc)
+        assert guass and cutoff is False and guass or cutoff is True
 
         if dc is None:
             distances_1d = convert_matrix_to_dense(distances)
             dc = select_dc(max_id, max_dis, min_dis, distances_1d, auto=auto_select_dc)
-        rho = local_density(max_id, distances, dc)
+
+        logger.info("PROGRESS: compute local density")
+        # Calculate Rho
+        # Note
+        # Guass: np.exp(- (d[i,j] / dc) ** 2)
+        # Cutoff: 1 if d[i,j] < dc else 0
+        # Rho[i] = sum( f(d[i,j], dc) ) for j in 0 to max_id - f(d[i,i], dc)
+
+        rho = np.zeros(max_id + 1, float)
+        rho[0] = -1
+        if guass:
+            for i in range(0, max_id):
+                t = -(distances[i, :] / dc) ** 2
+                rho[i + 1] = np.exp(t).sum() - 1  # remove guass(i,i) that equals to 1
+                if i % (max_id / 10) == 0:
+                    logger.info("PROGRESS: guass at index #%i" % i)
+        else:
+            for i in range(0, max_id):
+                rho[i + 1] = (distances[i, :] < dc).sum() - 1  # remove cutoff(i,i) that equals to 1
+                if i % (max_id / 10) == 0:
+                    logger.info("PROGRESS: cutoff at index #%i" % i)
+
         return rho, dc
 
     def cluster(self, distances, max_dis, min_dis, max_id, density_threshold, distance_threshold, dc=None,
