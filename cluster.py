@@ -82,17 +82,26 @@ def local_density(max_id, distances, dc, guass=True, cutoff=False):
     """
     assert guass and cutoff is False and guass or cutoff is True
     logger.info("PROGRESS: compute local density")
-    guass_func = lambda dij, dc: math.exp(- (dij / dc) ** 2)
-    cutoff_func = lambda dij, dc: 1 if dij < dc else 0
-    func = guass and guass_func or cutoff_func
-    rho = [-1] + [0] * max_id
-    for i in range(1, max_id):
-        for j in range(i + 1, max_id + 1):
-            rho[i] += func(distances[i - 1, j - 1], dc)
-            rho[j] += func(distances[i - 1, j - 1], dc)
-        if i % (max_id / 10) == 0:
-            logger.info("PROGRESS: at index #%i" % i)
-    return np.array(rho, np.float32)
+    # Note
+    # Guass: np.exp(- (d[i,j] / dc) ** 2)
+    # Cutoff: 1 if d[i,j] < dc else 0
+    # Rho[i] = sum( f(d[i,j], dc) ) for j in 0 to max_id - f(d[i,i], dc)
+
+    rho = np.zeros(max_id + 1, float)
+    rho[0] = -1
+    if guass:
+        for i in range(0, max_id):
+            t = -(distances[i, :] / dc) ** 2
+            rho[i + 1] = np.exp(t).sum() - 1  # remove guass(i,i) that equals to 1
+            if i % (max_id / 10) == 0:
+                logger.info("PROGRESS: guass at index #%i" % i)
+    else:
+        for i in range(0, max_id):
+            rho[i + 1] = (distances[i, :] < dc).sum() - 1  # remove cutoff(i,i) that equals to 1
+            if i % (max_id / 10) == 0:
+                logger.info("PROGRESS: cutoff at index #%i" % i)
+
+    return rho
 
 
 def min_distance(max_id, max_dis, distances, rho):
