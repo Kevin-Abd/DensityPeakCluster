@@ -18,6 +18,7 @@ def plot_rho_delta(rho, delta):
     """
     logger.info("PLOT: rho-delta plot")
     plot_scatter_diagram(0, rho[1:], delta[1:], x_label='rho', y_label='delta', title='Decision Graph')
+    plt.show()
     plt.savefig('Decision Graph.jpg')
 
 
@@ -49,6 +50,7 @@ def plot_cluster(distances, max_id, cluster):
     logger.info("PLOT: end mds, start plot")
     plot_scatter_diagram(1, dp_mds[:, 0], dp_mds[:, 1], title='2D Nonclassical Multidimensional Scaling',
                          style_list=cls)
+    plt.show()
     plt.savefig("2D Nonclassical Multidimensional Scaling.jpg")
 
 
