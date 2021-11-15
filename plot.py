@@ -32,8 +32,8 @@ def plot_cluster(cluster):
 	cls = []
 	for i in range(1, cluster.max_id):
 		for j in range(i + 1, cluster.max_id + 1):
-			dp[i - 1, j - 1] = cluster.distances[(i, j)]
-			dp[j - 1, i - 1] = cluster.distances[(i, j)]
+			dp[i - 1, j - 1] = cluster.distances[i-1, j-1]
+			dp[j - 1, i - 1] = cluster.distances[i-1, j-1]
 		cls.append(cluster.cluster[i])
 	cls.append(cluster.cluster[cluster.max_id])
 	cls = np.array(cls, dtype = np.float32)
@@ -62,8 +62,8 @@ def plot_rhodelta_rho(rho, delta):
 	x=np.zeros(y.shape[0])
 	idx=0
 	for r in r_index:
-	    x[r]=idx
-	    idx+=1
+		x[r]=idx
+		idx+=1
 	plt.figure(2)
 	plt.clf()
 	plt.scatter(x,y)

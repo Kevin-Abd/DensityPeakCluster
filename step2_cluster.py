@@ -4,16 +4,17 @@
 import logging
 from plot import *
 from cluster import *
-from utils import load_paperdata
+from utils import load_paperdata, convert_to_matrix
 
 
 def plot(data, density_threshold, distance_threshold, auto_select_dc = False):
 	logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
-	distances, max_dis, min_dis, max_id = load_paperdata(data)
+	distances_dict, max_dis, min_dis, max_id = load_paperdata(data)
+	distances_matrix = convert_to_matrix(distances_dict, max_id)
 
 	dpcluster = DensityPeakCluster()
-	rho, delta, nneigh = dpcluster.cluster(distances, max_dis, min_dis, max_id, density_threshold, distance_threshold, auto_select_dc = auto_select_dc)
+	rho, delta, nneigh = dpcluster.cluster(distances_matrix, max_dis, min_dis, max_id, density_threshold, distance_threshold, auto_select_dc = auto_select_dc)
 	logger.info(str(len(dpcluster.ccenter)) + ' center as below')
 	for idx, center in dpcluster.ccenter.items():
 		logger.info('%d %f %f' %(idx, rho[center], delta[center]))

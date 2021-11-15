@@ -4,16 +4,16 @@
 import logging
 from plot import *
 from cluster import *
-from utils import load_paperdata
+from utils import load_paperdata, convert_to_matrix
 
 def plot(data, auto_select_dc = False):
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
-    distances, max_dis, min_dis, max_id = load_paperdata(data)
-
+    distances_dict, max_dis, min_dis, max_id = load_paperdata(data)
+    distances_matrix = convert_to_matrix(distances_dict, max_id)
     dpcluster = DensityPeakCluster()
-    distances, max_dis, min_dis, max_id, rho, rc = dpcluster.local_density(distances, max_dis, min_dis, max_id, auto_select_dc = auto_select_dc)
-    delta, nneigh = min_distance(max_id, max_dis, distances, rho)
+    rho, rc = dpcluster.local_density(distances_matrix, max_dis, min_dis, max_id, auto_select_dc = auto_select_dc)
+    delta, nneigh = min_distance(max_id, max_dis, distances_matrix, rho)
     plot_rho_delta(rho, delta)   #plot to choose the threthold
 
 if __name__ == '__main__':

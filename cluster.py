@@ -3,45 +3,48 @@
 
 import logging
 import math
-
 import numpy as np
+
+from utils import convert_matrix_to_dense
 
 logger = logging.getLogger("dpc_cluster")
 
 
-def select_dc(max_id, max_dis, min_dis, distances, auto=False):
+def select_dc(max_id, max_dis, min_dis, distances_1d, auto=False):
     """
     Select the local density threshold, default is the method used in paper, auto is `auto_select_dc`
 
     Args:
-        max_id    : max continues id
-        max_dis   : max distance for all points
-        min_dis   : min distance for all points
-        distances : distance dict
-        auto      : use auto dc select or not
+        max_id       : max continues id
+        max_dis      : max distance for all points
+        min_dis      : min distance for all points
+        distances_1d : 1d distance array
+        auto         : use auto dc select or not
 
     Returns:
         dc that local density threshold
     """
     logger.info("PROGRESS: select dc")
     if auto:
-        return auto_select_dc(max_id, max_dis, min_dis, distances)
+        return auto_select_dc(max_id, max_dis, min_dis, distances_1d)
     percent = 2.0
     position = int(max_id * (max_id + 1) / 2 * percent / 100)
-    dc = sorted(distances.values())[position * 2 + max_id]
+    sorted_dist = np.sort(distances_1d)
+    index = position * 2 + max_id
+    dc = sorted_dist[index]
     logger.info("PROGRESS: dc - " + str(dc))
     return dc
 
 
-def auto_select_dc(max_id, max_dis, min_dis, distances):
+def auto_select_dc(max_id, max_dis, min_dis, distances_1d):
     """
     Auto select the local density threshold that let average neighbor is 1-2 percent of all nodes.
 
     Args:
-        max_id    : max continues id
-        max_dis   : max distance for all points
-        min_dis   : min distance for all points
-        distances : distance dict
+        max_id       : max continues id
+        max_dis      : max distance for all points
+        min_dis      : min distance for all points
+        distances_1d : 1d distance array
 
     Returns:
         dc that local density threshold
@@ -49,7 +52,7 @@ def auto_select_dc(max_id, max_dis, min_dis, distances):
     dc = (max_dis + min_dis) / 2
 
     while True:
-        nneighs = sum([1 for v in distances.values() if v < dc]) / max_id ** 2
+        nneighs = (distances_1d < dc).sum() / max_id ** 2
         if 0.01 <= nneighs <= 0.002:
             break
         # binary search
@@ -69,7 +72,7 @@ def local_density(max_id, distances, dc, guass=True, cutoff=False):
 
     Args:
         max_id    : max continues id
-        distances : distance dict
+        distances : distance matrix
         dc        : local density threshold
         guass     : use guass func or not(can't use together with cutoff)
         cutoff    : use cutoff func or not(can't use together with guass)
@@ -85,8 +88,8 @@ def local_density(max_id, distances, dc, guass=True, cutoff=False):
     rho = [-1] + [0] * max_id
     for i in range(1, max_id):
         for j in range(i + 1, max_id + 1):
-            rho[i] += func(distances[(i, j)], dc)
-            rho[j] += func(distances[(i, j)], dc)
+            rho[i] += func(distances[i - 1, j - 1], dc)
+            rho[j] += func(distances[i - 1, j - 1], dc)
         if i % (max_id / 10) == 0:
             logger.info("PROGRESS: at index #%i" % i)
     return np.array(rho, np.float32)
@@ -99,7 +102,7 @@ def min_distance(max_id, max_dis, distances, rho):
     Args:
         max_id    : max continues id
         max_dis   : max distance for all points
-        distances : distance dict
+        distances : distance matrix
         rho       : local density vector that index is the point index that start from 1
 
     Returns:
@@ -112,8 +115,8 @@ def min_distance(max_id, max_dis, distances, rho):
     for i in range(1, max_id):
         for j in range(0, i):
             old_i, old_j = sort_rho_idx[i], sort_rho_idx[j]
-            if distances[(old_i, old_j)] < delta[old_i]:
-                delta[old_i] = distances[(old_i, old_j)]
+            if distances[old_i - 1, old_j - 1] < delta[old_i]:
+                delta[old_i] = distances[old_i -1, old_j - 1]
                 nneigh[old_i] = old_j
         if i % (max_id / 10) == 0:
             logger.info("PROGRESS: at index #%i" % (i))
@@ -130,7 +133,7 @@ class DensityPeakCluster(object):
             max_id          : max continues id
             max_dis         : max distance for all points
             min_dis         : min distance for all points
-            distances       : distance dict
+            distances       : distance matrix
             dc              : local density threshold, call select_dc if dc is None
             auto_select_dc  : auto select dc or not
 
@@ -140,7 +143,8 @@ class DensityPeakCluster(object):
         assert not (dc is not None and auto_select_dc)
 
         if dc is None:
-            dc = select_dc(max_id, max_dis, min_dis, distances, auto=auto_select_dc)
+            distances_1d = convert_matrix_to_dense(distances)
+            dc = select_dc(max_id, max_dis, min_dis, distances_1d, auto=auto_select_dc)
         rho = local_density(max_id, distances, dc)
         return rho, dc
 
@@ -156,7 +160,7 @@ class DensityPeakCluster(object):
             max_id              : max continues id
             max_dis             : max distance for all points
             min_dis             : min distance for all points
-            distances           : distance dict
+            distances           : distance matrix
             dc                  : local density threshold, call select_dc if dc is None
             auto_select_dc      : auto select dc or not
 
@@ -196,7 +200,7 @@ class DensityPeakCluster(object):
                 bord_rho[idx] = 0.0
             for i in range(1, rho.shape[0] - 1):
                 for j in range(i + 1, rho.shape[0]):
-                    if cluster[i] != cluster[j] and distances[i, j] <= dc:
+                    if cluster[i] != cluster[j] and distances[i-1, j-1] <= dc:
                         rho_aver = (rho[i] + rho[j]) / 2.0
                         if rho_aver > bord_rho[cluster[i]]:
                             bord_rho[cluster[i]] = rho_aver
