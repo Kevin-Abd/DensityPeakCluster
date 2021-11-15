@@ -9,6 +9,7 @@ from utils import convert_matrix_to_dense
 
 logger = logging.getLogger("dpc_cluster")
 
+
 class DensityPeakCluster(object):
 
     @staticmethod
@@ -105,8 +106,8 @@ class DensityPeakCluster(object):
         delta[sort_rho_idx[0]] = delta.max()
         return delta, nneigh
 
-    def local_density(self, distances, max_dis, min_dis, max_id, dc=None, auto_select_dc=False, guass=True,
-                      cutoff=False):
+    @staticmethod
+    def local_density(distances, max_dis, min_dis, max_id, dc=None, auto_select_dc=False, guass=True, cutoff=False):
         """
         Just compute local density
 
