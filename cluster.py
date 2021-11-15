@@ -118,6 +118,8 @@ class DensityPeakCluster(object):
             distances       : distance matrix
             dc              : local density threshold, call select_dc if dc is None
             auto_select_dc  : auto select dc or not
+            cutoff          : use cutoff func or not(can't use together with guass)
+            guass           : use guass func or not(can't use together with cutoff)
 
         Returns:
             local density vector, dc
