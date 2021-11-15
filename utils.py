@@ -62,3 +62,19 @@ def convert_to_matrix(distances_dict: dict, max_id: int):
             distances[j, i] = distances[i, j]
     logger.info("PROGRESS: convert end")
     return distances
+
+
+def convert_matrix_to_dense(distance_matrix: np.ndarray):
+    """
+    Convert a matrix distance into a condensed distance array (ignoring diagonal values)
+    Args:
+        distance_matrix: distance matrix
+
+    Returns:
+        condensed matrix array
+    """
+    size = distance_matrix.shape[0]
+    views = [None] * (size - 1)
+    for i in range(size - 1):
+        views[i] = distance_matrix[i, i + 1:size]
+    return np.concatenate(views)
