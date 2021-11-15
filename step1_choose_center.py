@@ -4,6 +4,7 @@
 import logging
 from plot import *
 from cluster import *
+from utils import load_paperdata
 
 def plot(data, auto_select_dc = False):
 	logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)

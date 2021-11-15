@@ -4,6 +4,7 @@
 import logging
 from plot import *
 from cluster import *
+from utils import load_paperdata
 
 
 def plot(data, density_threshold, distance_threshold, auto_select_dc = False):
