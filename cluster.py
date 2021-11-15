@@ -188,48 +188,50 @@ class DensityPeakCluster(object):
         assert not (dc is not None and auto_select_dc)
         rho, dc = self.local_density(distances, max_dis, min_dis, max_id, dc=dc, auto_select_dc=auto_select_dc)
         delta, nneigh = min_distance(max_id, max_dis, distances, rho)
+        nneigh = nneigh.astype(int)  # nneigh will be used as indexing so it should be int
         logger.info("PROGRESS: start cluster")
-        cluster, ccenter = {}, {}  # cl/icl in cluster_dp.m
 
-        for idx, (ldensity, mdistance, nneigh_item) in enumerate(zip(rho, delta, nneigh)):
-            if idx == 0:
-                continue
-            if ldensity >= density_threshold and mdistance >= distance_threshold:
-                ccenter[idx] = idx
-                cluster[idx] = idx
-            else:
-                cluster[idx] = -1
+        # cl/icl in cluster_dp.m
+        cluster = np.zeros(max_id + 1, int)
+        ccenter = np.zeros(max_id + 1, int)
+
+        index = np.logical_and(rho >= density_threshold, delta >= distance_threshold)
+        index_val = np.where(index)[0]
+        ccenter[index] = index_val
+        cluster[index] = index_val
+        cluster[np.invert(index)] = -1
 
         # assignation
         ordrho = np.argsort(-rho)
         for i in range(ordrho.shape[0] - 1):
-            if ordrho[i] == 0: continue
+            if ordrho[i] == 0:
+                continue
             if cluster[ordrho[i]] == -1:
                 cluster[ordrho[i]] = cluster[nneigh[ordrho[i]]]
             if i % (max_id / 10) == 0:
-                logger.info("PROGRESS: at index #%i" % (i))
+                logger.info("PROGRESS: assignation at #%i" % i)
 
         # halo
-        halo, bord_rho = {}, {}
-        for i in range(1, ordrho.shape[0]):
-            halo[i] = cluster[i]
+        halo = np.zeros(max_id + 1)
+        bord_rho = np.zeros(max_id + 1)
+        halo[1:] = cluster[1:]
+
         if len(ccenter) > 0:
-            for idx in ccenter.keys():
-                bord_rho[idx] = 0.0
             for i in range(1, rho.shape[0] - 1):
                 for j in range(i + 1, rho.shape[0]):
-                    if cluster[i] != cluster[j] and distances[i-1, j-1] <= dc:
+                    if cluster[i] != cluster[j] and distances[i - 1, j - 1] <= dc:
                         rho_aver = (rho[i] + rho[j]) / 2.0
                         if rho_aver > bord_rho[cluster[i]]:
                             bord_rho[cluster[i]] = rho_aver
                         if rho_aver > bord_rho[cluster[j]]:
                             bord_rho[cluster[j]] = rho_aver
+                if i % (max_id / 10) == 0:
+                    logger.info("PROGRESS: halo at #%i" % i)
             for i in range(1, rho.shape[0]):
                 if rho[i] < bord_rho[cluster[i]]:
                     halo[i] = 0
-        for i in range(1, rho.shape[0]):
-            if halo[i] == 0:
-                cluster[i] = - 1
+
+        cluster[halo == 0] = -1
 
         self.cluster, self.ccenter = cluster, ccenter
         self.distances = distances
