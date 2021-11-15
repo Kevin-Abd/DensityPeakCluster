@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import logging
+from typing import Tuple
 
 import numpy as np
 
@@ -13,7 +14,7 @@ logger = logging.getLogger("dpc_cluster")
 class DensityPeakCluster(object):
 
     @staticmethod
-    def select_dc(max_id, max_dis, min_dis, distances_1d, auto=False):
+    def select_dc(max_id: int, max_dis: float, min_dis: float, distances_1d: np.ndarray, auto: bool = False) -> float:
         """
         Select the local density threshold, default is the method used in paper, auto is `auto_select_dc`
 
@@ -39,7 +40,7 @@ class DensityPeakCluster(object):
         return dc
 
     @staticmethod
-    def auto_select_dc(max_id, max_dis, min_dis, distances_1d):
+    def auto_select_dc(max_id: int, max_dis: float, min_dis: float, distances_1d: np.ndarray) -> float:
         """
         Auto select the local density threshold that let average neighbor is 1-2 percent of all nodes.
 
@@ -69,7 +70,8 @@ class DensityPeakCluster(object):
         return dc
 
     @staticmethod
-    def min_distance(max_id, max_dis, distances, rho):
+    def min_distance(max_id: int, max_dis: float, distances: np.ndarray, rho: np.ndarray) -> Tuple[
+                        np.ndarray, np.ndarray]:
         """
         Compute all points' min distance to the higher local density point(which is the nearest neighbor)
 
@@ -107,7 +109,9 @@ class DensityPeakCluster(object):
         return delta, nneigh
 
     @staticmethod
-    def local_density(distances, max_dis, min_dis, max_id, dc=None, auto_select_dc=False, guass=True, cutoff=False):
+    def local_density(distances: np.ndarray, max_dis: float, min_dis: float, max_id: int, dc: float = None,
+                      auto_select_dc: bool = False, guass: bool = True, cutoff: bool = False) -> Tuple[
+                        np.ndarray, float]:
         """
         Just compute local density
 
@@ -154,8 +158,9 @@ class DensityPeakCluster(object):
 
         return rho, dc
 
-    def cluster(self, distances, max_dis, min_dis, max_id, density_threshold, distance_threshold, dc=None,
-                auto_select_dc=False):
+    def cluster(self, distances: np.ndarray, max_dis: float, min_dis: float, max_id: int, density_threshold: float,
+                distance_threshold: float, dc: float = None, auto_select_dc: bool = False) -> Tuple[
+                    np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """
         Cluster the data
 
@@ -171,7 +176,7 @@ class DensityPeakCluster(object):
             auto_select_dc      : auto select dc or not
 
         Returns:
-            local density vector, min_distance vector, nearest neighbor vector
+            local density vector, min_distance vector, nearest neighbor vector, cluster vector, ccenter vector
         """
         assert not (dc is not None and auto_select_dc)
         rho, dc = self.local_density(distances, max_dis, min_dis, max_id, dc=dc, auto_select_dc=auto_select_dc)
