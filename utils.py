@@ -9,7 +9,7 @@ import numpy as np
 logger = logging.getLogger("dpc_cluster")
 
 def load_paperdata(distance_f):
-    '''
+    """
     Load distance from data
 
     Args:
@@ -17,7 +17,7 @@ def load_paperdata(distance_f):
 
     Returns:
         distances dict, max distance, min distance, max continues id
-    '''
+    """
     logger.info("PROGRESS: load data")
     distances = {}
     min_dis, max_dis = sys.float_info.max, 0.0

@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def plot_scatter_diagram(which_fig, x, y, x_label = 'x', y_label = 'y', title = 'title', style_list = None):
-	'''
+	"""
 	Plot scatter diagram
 
 	Args:
@@ -16,7 +16,7 @@ def plot_scatter_diagram(which_fig, x, y, x_label = 'x', y_label = 'y', title = 
 		x_label    : label of x pixel
 		y_label    : label of y pixel
 		title      : title of the plot
-	'''
+	"""
 	styles = ['k', 'g', 'r', 'c', 'm', 'y', 'b', '#9400D3','#C0FF3E']
 	assert len(x) == len(y)
 	if style_list != None:

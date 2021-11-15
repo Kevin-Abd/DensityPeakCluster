@@ -10,7 +10,7 @@ logger = logging.getLogger("dpc_cluster")
 
 
 def select_dc(max_id, max_dis, min_dis, distances, auto=False):
-    '''
+    """
     Select the local density threshold, default is the method used in paper, auto is `autoselect_dc`
 
     Args:
@@ -22,7 +22,7 @@ def select_dc(max_id, max_dis, min_dis, distances, auto=False):
 
     Returns:
         dc that local density threshold
-    '''
+    """
     logger.info("PROGRESS: select dc")
     if auto:
         return autoselect_dc(max_id, max_dis, min_dis, distances)
@@ -34,7 +34,7 @@ def select_dc(max_id, max_dis, min_dis, distances, auto=False):
 
 
 def autoselect_dc(max_id, max_dis, min_dis, distances):
-    '''
+    """
     Auto select the local density threshold that let average neighbor is 1-2 percent of all nodes.
 
     Args:
@@ -45,7 +45,7 @@ def autoselect_dc(max_id, max_dis, min_dis, distances):
 
     Returns:
         dc that local density threshold
-    '''
+    """
     dc = (max_dis + min_dis) / 2
 
     while True:
@@ -64,7 +64,7 @@ def autoselect_dc(max_id, max_dis, min_dis, distances):
 
 
 def local_density(max_id, distances, dc, guass=True, cutoff=False):
-    '''
+    """
     Compute all points' local density
 
     Args:
@@ -75,7 +75,7 @@ def local_density(max_id, distances, dc, guass=True, cutoff=False):
 
     Returns:
         local density vector that index is the point index that start from 1
-    '''
+    """
     assert guass and cutoff == False and guass or cutoff == True
     logger.info("PROGRESS: compute local density")
     guass_func = lambda dij, dc: math.exp(- (dij / dc) ** 2)
@@ -92,7 +92,7 @@ def local_density(max_id, distances, dc, guass=True, cutoff=False):
 
 
 def min_distance(max_id, max_dis, distances, rho):
-    '''
+    """
     Compute all points' min distance to the higher local density point(which is the nearest neighbor)
 
     Args:
@@ -103,7 +103,7 @@ def min_distance(max_id, max_dis, distances, rho):
 
     Returns:
         min_distance vector, nearest neighbor vector
-    '''
+    """
     logger.info("PROGRESS: compute min distance to nearest higher density neigh")
     sort_rho_idx = np.argsort(-rho)
     delta, nneigh = [0.0] + [float(max_dis)] * (len(rho) - 1), [0] * len(rho)
@@ -122,7 +122,7 @@ def min_distance(max_id, max_dis, distances, rho):
 
 class DensityPeakCluster(object):
     def local_density(self, distances, max_dis, min_dis, max_id, dc=None, auto_select_dc=False):
-        '''
+        """
         Just compute local density
 
         Args:
@@ -135,7 +135,7 @@ class DensityPeakCluster(object):
 
         Returns:
             local density vector, dc
-        '''
+        """
         assert not (dc != None and auto_select_dc)
 
         if dc == None:
@@ -145,7 +145,7 @@ class DensityPeakCluster(object):
 
     def cluster(self, distances, max_dis, min_dis, max_id, density_threshold, distance_threshold, dc=None,
                 auto_select_dc=False):
-        '''
+        """
         Cluster the data
 
         Args:
@@ -161,7 +161,7 @@ class DensityPeakCluster(object):
 
         Returns:
             local density vector, min_distance vector, nearest neighbor vector
-        '''
+        """
         assert not (dc != None and auto_select_dc)
         rho, dc = self.local_density(distances, max_dis, min_dis, max_id, dc=dc, auto_select_dc=auto_select_dc)
         delta, nneigh = min_distance(max_id, max_dis, distances, rho)
