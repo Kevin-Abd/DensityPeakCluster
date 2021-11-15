@@ -12,7 +12,7 @@ def plot(data, auto_select_dc=False):
     distances_matrix = convert_to_matrix(distances_dict, max_id)
     dpcluster = DensityPeakCluster()
     rho, rc = dpcluster.local_density(distances_matrix, max_dis, min_dis, max_id, auto_select_dc=auto_select_dc)
-    delta, nneigh = min_distance(max_id, max_dis, distances_matrix, rho)
+    delta, nneigh = DensityPeakCluster.min_distance(max_id, max_dis, distances_matrix, rho)
     plot_rho_delta(rho, delta)  # plot to choose the threshold
 
 
