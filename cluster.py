@@ -77,7 +77,7 @@ def local_density(max_id, distances, dc, guass=True, cutoff=False):
     Returns:
         local density vector that index is the point index that start from 1
     """
-    assert guass and cutoff == False and guass or cutoff == True
+    assert guass and cutoff is False and guass or cutoff is True
     logger.info("PROGRESS: compute local density")
     guass_func = lambda dij, dc: math.exp(- (dij / dc) ** 2)
     cutoff_func = lambda dij, dc: 1 if dij < dc else 0
@@ -137,9 +137,9 @@ class DensityPeakCluster(object):
         Returns:
             local density vector, dc
         """
-        assert not (dc != None and auto_select_dc)
+        assert not (dc is not None and auto_select_dc)
 
-        if dc == None:
+        if dc is None:
             dc = select_dc(max_id, max_dis, min_dis, distances, auto=auto_select_dc)
         rho = local_density(max_id, distances, dc)
         return rho, dc
@@ -163,7 +163,7 @@ class DensityPeakCluster(object):
         Returns:
             local density vector, min_distance vector, nearest neighbor vector
         """
-        assert not (dc != None and auto_select_dc)
+        assert not (dc is not None and auto_select_dc)
         rho, dc = self.local_density(distances, max_dis, min_dis, max_id, dc=dc, auto_select_dc=auto_select_dc)
         delta, nneigh = min_distance(max_id, max_dis, distances, rho)
         logger.info("PROGRESS: start cluster")
