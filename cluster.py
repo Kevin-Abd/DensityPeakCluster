@@ -233,8 +233,5 @@ class DensityPeakCluster(object):
 
         cluster[halo == 0] = -1
 
-        self.cluster, self.ccenter = cluster, ccenter
-        self.distances = distances
-        self.max_id = max_id
         logger.info("PROGRESS: ended")
-        return rho, delta, nneigh
+        return rho, delta, nneigh, cluster, ccenter
