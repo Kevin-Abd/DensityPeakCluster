@@ -119,18 +119,27 @@ def min_distance(max_id, max_dis, distances, rho):
     """
     logger.info("PROGRESS: compute min distance to nearest higher density neigh")
     sort_rho_idx = np.argsort(-rho)
-    delta, nneigh = [0.0] + [float(max_dis)] * (len(rho) - 1), [0] * len(rho)
+
+    nneigh = np.zeros(rho.shape, float)
+    delta = np.zeros(rho.shape, float)
+    delta[1:] = max_dis
     delta[sort_rho_idx[0]] = -1.
+
     for i in range(1, max_id):
-        for j in range(0, i):
-            old_i, old_j = sort_rho_idx[i], sort_rho_idx[j]
-            if distances[old_i - 1, old_j - 1] < delta[old_i]:
-                delta[old_i] = distances[old_i -1, old_j - 1]
-                nneigh[old_i] = old_j
+        old_i = sort_rho_idx[i]
+        old_js = sort_rho_idx[0:i]
+
+        index_min = np.argmin(distances[old_i - 1, old_js - 1])
+        min_old_j = old_js[index_min]
+        if distances[old_i - 1, min_old_j - 1] < delta[old_i]:
+            delta[old_i] = distances[old_i - 1, min_old_j - 1]
+            nneigh[old_i] = min_old_j
+
         if i % (max_id / 10) == 0:
-            logger.info("PROGRESS: at index #%i" % (i))
-    delta[sort_rho_idx[0]] = max(delta)
-    return np.array(delta, np.float32), np.array(nneigh, np.float32)
+            logger.info("PROGRESS: min_dist at #%i" % i)
+
+    delta[sort_rho_idx[0]] = delta.max()
+    return delta, nneigh
 
 
 class DensityPeakCluster(object):
