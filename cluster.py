@@ -50,7 +50,7 @@ def auto_select_dc(max_id, max_dis, min_dis, distances):
 
     while True:
         nneighs = sum([1 for v in distances.values() if v < dc]) / max_id ** 2
-        if nneighs >= 0.01 and nneighs <= 0.002:
+        if 0.01 <= nneighs <= 0.002:
             break
         # binary search
         if nneighs < 0.01:
@@ -88,7 +88,7 @@ def local_density(max_id, distances, dc, guass=True, cutoff=False):
             rho[i] += func(distances[(i, j)], dc)
             rho[j] += func(distances[(i, j)], dc)
         if i % (max_id / 10) == 0:
-            logger.info("PROGRESS: at index #%i" % (i))
+            logger.info("PROGRESS: at index #%i" % i)
     return np.array(rho, np.float32)
 
 
@@ -170,7 +170,8 @@ class DensityPeakCluster(object):
         cluster, ccenter = {}, {}  # cl/icl in cluster_dp.m
 
         for idx, (ldensity, mdistance, nneigh_item) in enumerate(zip(rho, delta, nneigh)):
-            if idx == 0: continue
+            if idx == 0:
+                continue
             if ldensity >= density_threshold and mdistance >= distance_threshold:
                 ccenter[idx] = idx
                 cluster[idx] = idx
