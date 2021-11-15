@@ -15,13 +15,13 @@ def plot(data, density_threshold, distance_threshold, auto_select_dc=False):
     rho, delta, nneigh, cluster, ccenter = dpcluster.cluster(distances_matrix, max_dis, min_dis, max_id,
                                                              density_threshold, distance_threshold,
                                                              auto_select_dc=auto_select_dc)
-    logger.info(str(len(ccenter)) + ' center as below')
     unique_centers = np.unique(ccenter)
+    logger.info(str(len(unique_centers)) + ' center as below')
     for idx, center in np.ndenumerate(unique_centers):
         logger.info('%d %d %f %f' % (idx[0], center, rho[center + 1], delta[center + 1]))
     plot_rho_delta(rho, delta)  # plot to choose the threshold
     plot_rhodelta_rho(rho, delta)
-    plot_cluster(dpcluster)
+    plot_cluster(distances_matrix, max_id, cluster)
 
 
 if __name__ == '__main__':
