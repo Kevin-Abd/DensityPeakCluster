@@ -11,7 +11,7 @@ logger = logging.getLogger("dpc_cluster")
 
 def select_dc(max_id, max_dis, min_dis, distances, auto=False):
     """
-    Select the local density threshold, default is the method used in paper, auto is `autoselect_dc`
+    Select the local density threshold, default is the method used in paper, auto is `auto_select_dc`
 
     Args:
         max_id    : max continues id
@@ -25,7 +25,7 @@ def select_dc(max_id, max_dis, min_dis, distances, auto=False):
     """
     logger.info("PROGRESS: select dc")
     if auto:
-        return autoselect_dc(max_id, max_dis, min_dis, distances)
+        return auto_select_dc(max_id, max_dis, min_dis, distances)
     percent = 2.0
     position = int(max_id * (max_id + 1) / 2 * percent / 100)
     dc = sorted(distances.values())[position * 2 + max_id]
@@ -33,7 +33,7 @@ def select_dc(max_id, max_dis, min_dis, distances, auto=False):
     return dc
 
 
-def autoselect_dc(max_id, max_dis, min_dis, distances):
+def auto_select_dc(max_id, max_dis, min_dis, distances):
     """
     Auto select the local density threshold that let average neighbor is 1-2 percent of all nodes.
 
@@ -70,7 +70,8 @@ def local_density(max_id, distances, dc, guass=True, cutoff=False):
     Args:
         max_id    : max continues id
         distances : distance dict
-        gauss     : use guass func or not(can't use together with cutoff)
+        dc        : local density threshold
+        guass     : use guass func or not(can't use together with cutoff)
         cutoff    : use cutoff func or not(can't use together with guass)
 
     Returns:
@@ -126,12 +127,12 @@ class DensityPeakCluster(object):
         Just compute local density
 
         Args:
-            max_id: max continues id
-            max_dis: max distance for all points
-            min_dis: min distance for all points
-            distances: distance dict
-            dc: local density threshold, call select_dc if dc is None
-            auto_select_dc : auto select dc or not
+            max_id          : max continues id
+            max_dis         : max distance for all points
+            min_dis         : min distance for all points
+            distances       : distance dict
+            dc              : local density threshold, call select_dc if dc is None
+            auto_select_dc  : auto select dc or not
 
         Returns:
             local density vector, dc
@@ -149,15 +150,15 @@ class DensityPeakCluster(object):
         Cluster the data
 
         Args:
-            dc: local density threshold, call select_dc if dc is None
-            density_threshold: local density threshold for choosing cluster center
-            distance_threshold: min distance threshold for choosing cluster center
-            max_id: max continues id
-            max_dis: max distance for all points
-            min_dis: min distance for all points
-            distances: distance dict
-            dc: local density threshold, call select_dc if dc is None
-            auto_select_dc : auto select dc or not
+            dc                  : local density threshold, call select_dc if dc is None
+            density_threshold   : local density threshold for choosing cluster center
+            distance_threshold  : min distance threshold for choosing cluster center
+            max_id              : max continues id
+            max_dis             : max distance for all points
+            min_dis             : min distance for all points
+            distances           : distance dict
+            dc                  : local density threshold, call select_dc if dc is None
+            auto_select_dc      : auto select dc or not
 
         Returns:
             local density vector, min_distance vector, nearest neighbor vector
